@@ -51,6 +51,10 @@ const rootReducers = {
     let event = action.payload
       , op
     ;
+    event = _.pick(event, [
+      '_id', 'confirm', 'title', 'start', 'end', 'teacher', 'description',
+      'repeat', 
+    ]);
     if (!_.has(event, '_id')) {
       event = _.assign({
         _id: new ObjectID().toString(),

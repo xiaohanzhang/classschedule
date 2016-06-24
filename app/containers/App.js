@@ -32,7 +32,7 @@ class App extends Component {
 
   render() {
     let { ui, user, teachers, actions } = this.props;
-
+    let defaultEventLength = 2 * 60 * 60 * 1000;
     return (
       <div className="app">
         <Header/>
@@ -42,6 +42,7 @@ class App extends Component {
               events={this.props.events}
               eventClick={actions.openEventModal}
               saveEvent={actions.saveEvent}
+              defaultEventLength={defaultEventLength}
             />
           </div>
           <SidePanel/>
@@ -49,6 +50,7 @@ class App extends Component {
         <LoginModal show={!user} onSubmit={actions.signIn}/>
         <EventModal show={ui.eventModal.show} 
           event={ui.eventModal.event}
+          defaultEventLength={defaultEventLength}
           teachers={teachers} 
           onClose={actions.closeEventModal}
           onSubmit={actions.saveEvent}/>

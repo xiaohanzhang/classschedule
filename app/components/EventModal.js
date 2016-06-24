@@ -3,6 +3,8 @@ import { PropTypes, Component } from 'react';
 import { 
   Modal, Button, Form, FormGroup, FormControl, ControlLabel, Checkbox, Col
 } from 'react-bootstrap';
+import moment from 'moment';
+
 import lang from '../lang';
 
 class EventModal extends Component {
@@ -11,10 +13,11 @@ class EventModal extends Component {
     this.state = {};
     this.defaultEvent = {
       title: '',
+      start: '',
+      end: '',
       teacher: '',
       description: '',
       repeat: false,
-      dow: null,
     }
   }
 
@@ -35,11 +38,23 @@ class EventModal extends Component {
   }
 
   onSubmit($event) {
+    let data = _.pick(this.state, _.keys(this.defaultEvent));
+    let start = moment(data.start);
+    let end = moment(data.end);
+
     $event.preventDefault();
+    if (!start.isValid()) {
+      start = moment(this.props.start);
+      data.start = start.format();
+    }
+    if (!end.isValid()) {
+      end = start.clone().add(this.props.defaultEventLength);
+      data.end = end.format();
+    }
     this.props.onSubmit(_.assign(
       {},
       this.props.event,
-      _.pick(this.state, _.keys(this.defaultEvent))
+      data,
     ));
   }
 
@@ -47,33 +62,8 @@ class EventModal extends Component {
     this.props.onClose();
   }
 
-  onDaySelect(evt) {
-    let selected = [];
-    _.each(evt.target.children, function(option) {
-      if (option.selected)  {
-        selected.push(option.value);
-      }
-    });
-    if (selected.length === 0) {
-      selected = null;
-    }
-    this.setState({dow: selected});
-  }
-
   onRepeatCheck(evt) {
-    const checked = evt.target.checked
-      , event = this.props.event
-    ;
-
-    if (checked) {
-      this.setState({
-        repeat: checked,
-        //start: moment()
-        //end: 
-      });
-    } else {
-      this.setState({repeat: checked, dow: null});
-    }
+    this.setState({repeat: evt.target.checked});
   }
 
 
@@ -86,6 +76,21 @@ class EventModal extends Component {
     const teachersOptions = _.map(teachers, function(teacher, key) {
       return <option value={key} key={key}>{teacher.username}</option>
     });
+
+    /*
+    onDaySelect(evt) {
+      let selected = [];
+      _.each(evt.target.children, function(option) {
+        if (option.selected)  {
+          selected.push(option.value);
+        }
+      });
+      if (selected.length === 0) {
+        selected = null;
+      }
+      this.setState({dow: selected});
+    }
+
 
     let daySelect = null;
     if (this.state.repeat) {
@@ -102,6 +107,8 @@ class EventModal extends Component {
         </FormControl>
       );
     }
+    */
+
 
     return (
       <Modal show={show} onHide={onClose}>
@@ -128,11 +135,26 @@ class EventModal extends Component {
               </Col>
             </FormGroup>
             <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>{lang.startTime}</Col>
+              <Col sm={10}>
+                <FormControl type="text" 
+                  value={this.state.start}
+                  onChange={handleChange('start')}/>
+              </Col>
+            </FormGroup>
+            <FormGroup>
+              <Col componentClass={ControlLabel} sm={2}>{lang.endTime}</Col>
+              <Col sm={10}>
+                <FormControl type="text" 
+                  value={this.state.end}
+                  onChange={handleChange('end')}/>
+              </Col>
+            </FormGroup>
+            <FormGroup>
               <Col componentClass={ControlLabel} sm={2}>{lang.repeat}</Col>
               <Col sm={10}>
                 <Checkbox value={this.state.repeat}
                   onChange={this.onRepeatCheck.bind(this)}/>
-                {daySelect}
               </Col>
             </FormGroup>
             <FormGroup>
